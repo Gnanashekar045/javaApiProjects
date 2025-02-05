@@ -104,6 +104,16 @@
                     .then(() => this.renderCart());
             },
 
+            upadateProducts(updatedProduct) {
+                fetch("http://localhost:3000/cartdata", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(updatedProduct)
+                })
+                .then(() => this.renderCart());
+            },
+            
+
             calculateTotal() {
                 return this.items.reduce((total, item) => total + (item.price * item.quantity), 0);
             },

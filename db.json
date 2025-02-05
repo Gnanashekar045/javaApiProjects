@@ -1,52 +1,22 @@
-{  "cartdata": [
+{
+  "cartdata": [
     {
-      "id": 1738740558159,
-      "name": "sugar",
-      "price": 45,
-      "quantity": 2
-     },
-    {
-      "id": 1738740571057,
+      "id": 1738743277635,
       "name": "sugar",
       "price": 45,
       "quantity": 2
     },
     {
-      "id": 1738740746310,
-      "name": "sugar",
-      "price": 45,
-      "quantity": 2
-    },
-    {
-      "id": 1738741139600,
-      "name": "sugar",
-      "price": 45,
-      "quantity": 2
-    },
-    {
-      "id": 1738741151664,
-      "name": "45",
-      "price": 4,
-      "quantity": 2
-    },
-    {
-      "id": 1738741510939,
-      "name": "sugar",
-      "price": 45,
+      "id": 1738743287833,
+      "name": "sdsdsd",
+      "price": 65,
       "quantity": 3
     },
     {
-      "id": 1738741749877,
+      "id": 1738743590892,
       "name": "sugar",
       "price": 45,
-      "quantity": 2
-    },
-    {
-      "id": 1738741798662,
-      "name": "sdsdsd",
-      "price": 45,
-      "quantity": 2
-   }
+      "quantity": 5
+    }
   ]
-
 }
