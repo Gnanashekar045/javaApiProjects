@@ -60,6 +60,7 @@
     }
 
     async function updatePost(postId, updatedData) {
+      console.log('Updating post with data:', updatedData); 
       await fetch(`${apiUrl}/${postId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -80,8 +81,8 @@
           <p>${post.content}</p>
           <p>${post.likes} Likes</p>
           <div class="actions">
-            <button onclick="likePost(${post.id})">Like</button>
-            <button onclick="editPost(${post.id}, '${post.content}')">Edit</button>
+            <button onclick="likePost('${post.id}')">Like</button>
+            <button onclick="editPost('${post.id}', '${post.content}')">Edit</button>
           </div>
         `;
 
@@ -96,12 +97,15 @@
       }
     }
 
-    async function likePost(postId) {
+    async function likePost(postId) {      
       const response = await fetch(`${apiUrl}/${postId}`);
       const post = await response.json();
-      updatePost(postId, { ...post, likes: post.likes + 1 });
+      const updatedPost = { ...post, likes: post.likes + 1 };  
+      console.log('Post updated with new likes:', updatedPost); 
+      updatePost(postId, updatedPost);  
     }
 
+    
     document.getElementById("addPostForm").addEventListener("submit", (e) => {
       e.preventDefault();
       const content = document.getElementById("postContent").value;

@@ -21,16 +21,19 @@
   ],
   "postComments": [
     {
-      "id": "75ab",
-      "content": "nice suggestion",
-      "likes": 0,
-      "comments": [],
-      "date": "2025-02-06T07:12:32.538Z"
+      "content": "nice suggestionsd",
+      "likes": 2,
+      "id": "75ab"
     },
     {
       "id": "6a45",
       "content": "nice",
-      "likes": 0
+      "likes": 2
+    },
+    {
+      "id": "7d97",
+      "content": "wwrewr",
+      "likes": 4
     }
   ]
 }
