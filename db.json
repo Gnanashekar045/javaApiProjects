@@ -22,18 +22,46 @@
   "postComments": [
     {
       "content": "nice suggestionsd",
-      "likes": 2,
+      "likes": 3,
       "id": "75ab"
     },
     {
       "id": "6a45",
       "content": "nice",
-      "likes": 2
+      "likes": 3
     },
     {
       "id": "7d97",
       "content": "wwrewr",
       "likes": 4
+    }
+  ],
+  "seats": [],
+  "users": [
+    {
+      "id": "44c1",
+      "name": "gnna",
+      "email": "shekar@gmail.com",
+      "role": "Subscriber"
+    },
+    {
+      "id": "d729",
+      "name": "gnna",
+      "email": "shekar@gmail.com",
+      "role": "Subscriber"
+    },
+    {
+      "id": "635e",
+      "name": "gnna",
+      "email": "shekar@gmail.com",
+      "role": "Subscriber"
+    }
+  ],
+  "products": [
+    {
+      "id": "e9e7",
+      "name": "sugar",
+      "quantity": 45
     }
   ]
 }

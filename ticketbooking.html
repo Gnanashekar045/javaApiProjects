@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movie Ticket Booking System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .seat {
+      width: 50px;
+      height: 50px;
+      text-align: center;
+      line-height: 50px;
+      margin: 5px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      cursor: pointer;
+    }
+    .seat-available {
+      background-color: #28a745; 
+      color: white;
+    }
+    .seat-booked {
+      background-color: #dc3545; 
+      color: white;
+      cursor: not-allowed;
+    }
+    .screen {
+      width: 100%;
+      height: 40px;
+      margin: 20px 0;
+      background: #333;
+      color: white;
+      text-align: center;
+      line-height: 40px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <div class="container mx-auto p-6">
+    <h1 class="text-2xl font-bold text-center mb-6">Movie Ticket Booking System</h1>
+
+    <div class="screen">SCREEN</div>
+
+    <div id="seatArrangement" class="grid grid-cols-10 gap-4 justify-center">
+      <!-- Seats will be displayed here -->
+    </div>
+  </div>
+
+  <script>
+    const movieticketbooking = {
+      seats: [],
+
+      fetchSeats() {
+        console.log("Fetching seat data...");  
+        fetch('http://localhost:3000/seats')
+          .then(response => response.json())
+          .then(data => {
+            console.log("Fetched seats:", data); 
+            if (Array.isArray(data)) {
+              this.seats = data;
+              this.renderbooking(); 
+            } else {
+              console.error("Data is not in expected format.");
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching seat data:', error);
+          });
+      },
+
+      updateSeatStatus(seat) {
+        fetch(`http://localhost:3000/seats/${seat.id}`, {
+          method: 'PUT',  
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...seat,
+            isbooked: true,
+          }),
+        })
+        .then(response => response.json())   
+        .then(updatedSeat => {
+          console.log("Seat updated:", updatedSeat);
+          const seatIndex = this.seats.findIndex(s => s.id === updatedSeat.id);
+          if (seatIndex !== -1) {
+            this.seats[seatIndex] = updatedSeat; 
+            this.renderbooking();  
+          }
+        })
+        .catch(error => {
+          console.error('Error updating seat status:', error);
+        });
+      },
+
+
+      renderbooking() {
+        const seatArrangement = document.getElementById("seatArrangement");
+        seatArrangement.innerHTML = "";  
+
+        this.seats.forEach((seat) => {
+          const seatDiv = document.createElement("div");
+          seatDiv.className = `seat ${seat.isbooked ? "seat-booked" : "seat-available"}`;
+          seatDiv.textContent = seat.seatnumber;
+
+          seatDiv.onclick = () => {
+            if (!seat.isbooked) {
+              const confirmSeat = confirm(`Do you want to book seat ${seat.seatnumber}?`);
+              if (confirmSeat) {
+                this.updateSeatStatus(seat);  
+              }
+            } else {
+              alert(`Seat ${seat.seatnumber} is already booked.`);
+            }
+          };
+
+          seatArrangement.appendChild(seatDiv); 
+        });
+      },
+    };
+
+    movieticketbooking.fetchSeats();
+  </script>
+</body>
+</html>
