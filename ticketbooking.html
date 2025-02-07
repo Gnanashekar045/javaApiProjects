@@ -1,127 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Movie Ticket Booking System</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .seat {
-      width: 50px;
-      height: 50px;
-      text-align: center;
-      line-height: 50px;
-      margin: 5px;
-      border-radius: 5px;
-      border: 1px solid #ddd;
-      cursor: pointer;
-    }
-    .seat-available {
-      background-color: #28a745; 
-      color: white;
-    }
-    .seat-booked {
-      background-color: #dc3545; 
-      color: white;
-      cursor: not-allowed;
-    }
-    .screen {
-      width: 100%;
-      height: 40px;
-      margin: 20px 0;
-      background: #333;
-      color: white;
-      text-align: center;
-      line-height: 40px;
-      border-radius: 5px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Ticket Booking System</title>
+    <script defer src="app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 text-gray-800">
-  <div class="container mx-auto p-6">
-    <h1 class="text-2xl font-bold text-center mb-6">Movie Ticket Booking System</h1>
 
-    <div class="screen">SCREEN</div>
+<body>
+    <div class="bg-gray-900 min-h-screen font-sans text-white">
+        <div class="container mx-auto p-8">
+            <h1 class="text-4xl font-bold text-center mb-8">Movie Ticket Booking System 🎥</h1>
 
-    <div id="seatArrangement" class="grid grid-cols-10 gap-4 justify-center">
-      <!-- Seats will be displayed here -->
+            <!-- Search Movies Section -->
+            <div class="mb-6">
+                <input id="movie-search" type="text" placeholder="Search movies..."
+                    class="w-full p-4 border rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+            </div>
+
+            <div id="movie-list" class="mb-6 bg-gray-800 shadow-lg rounded-lg p-6">
+                <h2 class="text-2xl font-semibold mb-4">Available Movies</h2>
+                <ul id="movies" class="list-disc pl-5 space-y-2"></ul>
+            </div>
+
+            <!-- Theater Layout Section -->
+            <div id="theater-layout" class="bg-gray-800 shadow-lg rounded-lg p-6">
+                <h2 class="text-2xl font-semibold mb-6">Theater Layout</h2>
+
+                <!-- Legend -->
+                <div class="flex justify-around items-center mb-6 text-sm">
+                    <div class="flex items-center">
+                        <div class="w-6 h-6 bg-green-500 rounded-full mr-2"></div> <span>Available</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-6 h-6 bg-red-500 rounded-full mr-2"></div> <span>Booked</span>
+                    </div>
+                </div>
+
+                <!-- Seats -->
+                <div id="seats" class="grid grid-cols-10 gap-4 text-center"></div>
+
+                <div class="mt-6 text-center space-x-4">
+                    <button id="confirm-booking" class="bg-green-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-green-600 transition">Confirm Booking</button>
+                    <button id="cancel-booking" class="bg-red-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-red-600 transition">Cancel Booking</button>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <script>
-    const movieticketbooking = {
-      seats: [],
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const movieSearchInput = document.getElementById("movie-search");
+            const moviesContainer = document.getElementById("movies");
+            const seatsContainer = document.getElementById("seats");
+            const confirmBookingBtn = document.getElementById("confirm-booking");
+            const cancelBookingBtn = document.getElementById("cancel-booking");
 
-      fetchSeats() {
-        console.log("Fetching seat data...");  
-        fetch('http://localhost:3000/seats')
-          .then(response => response.json())
-          .then(data => {
-            console.log("Fetched seats:", data); 
-            if (Array.isArray(data)) {
-              this.seats = data;
-              this.renderbooking(); 
-            } else {
-              console.error("Data is not in expected format.");
-            }
-          })
-          .catch(error => {
-            console.error('Error fetching seat data:', error);
-          });
-      },
+            let theater;
 
-      updateSeatStatus(seat) {
-        fetch(`http://localhost:3000/seats/${seat.id}`, {
-          method: 'PUT',  
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            ...seat,
-            isbooked: true,
-          }),
-        })
-        .then(response => response.json())   
-        .then(updatedSeat => {
-          console.log("Seat updated:", updatedSeat);
-          const seatIndex = this.seats.findIndex(s => s.id === updatedSeat.id);
-          if (seatIndex !== -1) {
-            this.seats[seatIndex] = updatedSeat; 
-            this.renderbooking();  
-          }
-        })
-        .catch(error => {
-          console.error('Error updating seat status:', error);
+            const fetchMovies = async () => {
+                try {
+                    const response = await fetch("http://localhost:3000/movies");
+                    if (!response.ok) throw new Error("Failed to fetch movies");
+                    return await response.json();
+                } catch (error) {
+                    console.error("Error fetching movies:", error);
+                    return [];
+                }
+            };
+
+            const renderMovies = (movies) => {
+                moviesContainer.innerHTML = "";
+                if (!movies.length) {
+                    moviesContainer.innerHTML = `<p class="text-gray-400">No movies found.</p>`;
+                    return;
+                }
+                movies.forEach(movie => {
+                    const li = document.createElement("li");
+                    li.className = "bg-gray-700 p-4 rounded-md shadow-sm";
+                    li.textContent = `${movie.title} - ${movie.genre} (${movie.duration} min, Rating: ${movie.rating})`;
+                    moviesContainer.appendChild(li);
+                });
+            };
+
+            const renderSeats = () => {
+                seatsContainer.innerHTML = "";
+                theater.getSeats().forEach((row, rowIndex) => {
+                    row.forEach((seat, colIndex) => {
+                        const seatButton = document.createElement("button");
+                        seatButton.className = `p-4 w-12 h-12 rounded-lg ${seat.booked ? "bg-red-500" : "bg-green-500"} hover:opacity-75`;
+                        seatButton.textContent = `${rowIndex + 1}-${colIndex + 1}`;
+                        seatButton.title = seat.booked ? "Booked" : "Available";
+                        seatButton.addEventListener("click", () => toggleSeat(rowIndex, colIndex));
+                        seatsContainer.appendChild(seatButton);
+                    });
+                });
+            };
+
+            const toggleSeat = (row, col) => {
+                const seat = theater.getSeats()[row][col];
+                seat.booked = !seat.booked;
+                renderSeats();
+            };
+
+            confirmBookingBtn.addEventListener("click", () => {
+                alert("Booking confirmed!");
+            });
+
+            cancelBookingBtn.addEventListener("click", () => {
+                theater.getSeats().forEach((row, rowIndex) =>
+                    row.forEach((_, colIndex) => theater.cancelSeat(rowIndex, colIndex))
+                );
+                renderSeats();
+            });
+
+            movieSearchInput.addEventListener("input", async (event) => {
+                const query = event.target.value.toLowerCase();
+                const movies = await fetchMovies();
+                const filteredMovies = movies.filter((movie) => movie.title.toLowerCase().includes(query));
+                renderMovies(filteredMovies);
+            });
+
+            const createTheater = (rows, cols) => {
+                const seats = Array.from({ length: rows }, () =>
+                    Array.from({ length: cols }, () => ({ booked: false }))
+                );
+                return {
+                    bookSeat: (row, col) => {
+                        seats[row][col].booked = true;
+                    },
+                    cancelSeat: (row, col) => {
+                        seats[row][col].booked = false;
+                    },
+                    getSeats: () => seats,
+                };
+            };
+
+            theater = createTheater(5, 10);
+            renderSeats();
+            const movies = await fetchMovies();
+            renderMovies(movies);
         });
-      },
-
-
-      renderbooking() {
-        const seatArrangement = document.getElementById("seatArrangement");
-        seatArrangement.innerHTML = "";  
-
-        this.seats.forEach((seat) => {
-          const seatDiv = document.createElement("div");
-          seatDiv.className = `seat ${seat.isbooked ? "seat-booked" : "seat-available"}`;
-          seatDiv.textContent = seat.seatnumber;
-
-          seatDiv.onclick = () => {
-            if (!seat.isbooked) {
-              const confirmSeat = confirm(`Do you want to book seat ${seat.seatnumber}?`);
-              if (confirmSeat) {
-                this.updateSeatStatus(seat);  
-              }
-            } else {
-              alert(`Seat ${seat.seatnumber} is already booked.`);
-            }
-          };
-
-          seatArrangement.appendChild(seatDiv); 
-        });
-      },
-    };
-
-    movieticketbooking.fetchSeats();
-  </script>
+    </script>
 </body>
+
 </html>
