@@ -45,28 +45,51 @@
     const apiUrl = "http://localhost:3000/postComments";
 
     async function fetchPosts() {
-      const response = await fetch(apiUrl);
-      const posts = await response.json();
-      renderPosts(posts);
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error("Failed to fetch posts");
+        const posts = await response.json();
+        renderPosts(posts);
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+      }
     }
 
     async function addPost(content) {
-      await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content, likes: 0 }),
-      });
-      fetchPosts();
+      try {
+        await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content, likes: 0 }),
+        });
+        fetchPosts();
+      } catch (error) {
+        console.error("Error adding post:", error);
+      }
     }
 
     async function updatePost(postId, updatedData) {
-      console.log('Updating post with data:', updatedData); 
-      await fetch(`${apiUrl}/${postId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedData),
-      });
-      fetchPosts();
+      try {
+        await fetch(`${apiUrl}/${postId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedData),
+        });
+        fetchPosts();
+      } catch (error) {
+        console.error("Error updating post:", error);
+      }
+    }
+
+    async function deletePost(postId) {
+      try {
+        await fetch(`${apiUrl}/${postId}`, {
+          method: "DELETE",
+        });
+        fetchPosts();
+      } catch (error) {
+        console.error("Error deleting post:", error);
+      }
     }
 
     function renderPosts(posts) {
@@ -83,6 +106,7 @@
           <div class="actions">
             <button onclick="likePost('${post.id}')">Like</button>
             <button onclick="editPost('${post.id}', '${post.content}')">Edit</button>
+            <button onclick="deletePost('${post.id}')">Delete</button>
           </div>
         `;
 
@@ -93,25 +117,33 @@
     function editPost(postId, oldContent) {
       const newContent = prompt("Edit your post:", oldContent);
       if (newContent) {
-        updatePost(postId, { content: newContent, likes: 0 });
+        updatePost(postId, { content: newContent });
       }
     }
 
-    async function likePost(postId) {      
-      const response = await fetch(`${apiUrl}/${postId}`);
-      const post = await response.json();
-      const updatedPost = { ...post, likes: post.likes + 1 };  
-      console.log('Post updated with new likes:', updatedPost); 
-      updatePost(postId, updatedPost);  
+    async function likePost(postId) {
+      try {
+        const response = await fetch(`${apiUrl}/${postId}`);
+        if (!response.ok) throw new Error("Failed to fetch post");
+        const post = await response.json();
+        const updatedPost = { ...post, likes: post.likes + 1 };
+        updatePost(postId, updatedPost);
+      } catch (error) {
+        console.error("Error liking post:", error);
+      }
     }
 
-    
     document.getElementById("addPostForm").addEventListener("submit", (e) => {
       e.preventDefault();
       const content = document.getElementById("postContent").value;
-      addPost(content);
-      e.target.reset();
+      if (content.trim()) {
+        addPost(content);
+        e.target.reset();
+      } else {
+        alert("Please enter some content before adding a post.");
+      }
     });
+
 
     fetchPosts();
   </script>

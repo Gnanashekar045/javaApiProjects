@@ -1,27 +1,17 @@
 {
   "cartdata": [
     {
-      "id": "1738743277635",
+      "id": "1739094772744",
       "name": "sugar",
       "price": 45,
-      "quantity": 2
+      "quantity": 3
     }
   ],
   "postComments": [
     {
-      "content": "nice suggestionsd",
-      "likes": 3,
-      "id": "75ab"
-    },
-    {
-      "id": "6a45",
-      "content": "nice",
+      "id": "80ed",
+      "content": "sdfsdjk",
       "likes": 3
-    },
-    {
-      "id": "7d97",
-      "content": "wwrewr",
-      "likes": 4
     }
   ],
   "seats": [],

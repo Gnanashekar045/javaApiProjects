@@ -1,234 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-  </head>
-  <body>
-    <div>
-      <label for="fname">First Name</label>
-      <input type="text" id="fname" name="fname" />
-    </div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Social Media Post Editor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7fafc;
+      color: #2d3748;
+    }
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .post {
+      padding: 10px;
+      border: 1px solid #ddd;
+      margin: 10px 0;
+      border-radius: 5px;
+    }
+    .actions button {
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Social Media Posts</h2>
 
-    <div>
-      <p>Gender</p>
-      <input type="radio" name="gender" value="Male" id="gender-male" />
-      <label for="gender-male">Male</label>
+    <form id="addPostForm">
+      <textarea id="postContent" rows="3" style="width: 100%;" placeholder="What's on your mind?" required></textarea>
+      <button type="submit">Add Post</button>
+    </form>
 
-      <input type="radio" name="gender" value="Female" id="gender-female" />
-      <label for="gender-female">Female</label>
+    <div id="postsContainer"></div>
+  </div>
 
-      <input type="radio" name="gender" value="Others" id="gender-others" />
-      <label for="gender-others">Others</label>
-    </div>
+  <script>
+    const apiUrl = "http://localhost:3000/postComments";
 
-    <div>
-      <p>Select Subjects</p>
-      <input type="checkbox" name="subjects" value="Kannada" id="subjects-kannada" />
-      <label for="subjects-kannada">Kannada</label>
+    async function fetchPosts() {
+      const response = await fetch(apiUrl);
+      const posts = await response.json();
+      renderPosts(posts);
+    }
 
-      <input type="checkbox" name="subjects" value="Science" id="subjects-science" />
-      <label for="subjects-science">Science</label>
+    async function addPost(content) {
+      await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, likes: 0 }),
+      });
+      fetchPosts();
+    }
 
-      <input type="checkbox" name="subjects" value="English" id="subjects-english" />
-      <label for="subjects-english">English</label>
-    </div>
+    async function updatePost(postId, updatedData) {
+      console.log('Updating post with data:', updatedData); 
+      await fetch(`${apiUrl}/${postId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedData),
+      });
+      fetchPosts();
+    }
 
-    <div>
-      <p>Upload Project</p>
-      <input type="file" id="file" name="file" />
-    </div>
+    function renderPosts(posts) {
+      const container = document.getElementById("postsContainer");
+      container.innerHTML = "";
 
-    <div>
-      <p>Email</p>
-      <input type="email" id="email" name="email" />
-    </div>
+      posts.forEach(post => {
+        const postElement = document.createElement("div");
+        postElement.classList.add("post");
 
-    <div>
-      <p>Feedback</p>
-      <textarea id="feedback" name="feedback"></textarea>
-    </div>
+        postElement.innerHTML = `
+          <p>${post.content}</p>
+          <p>${post.likes} Likes</p>
+          <div class="actions">
+            <button onclick="likePost('${post.id}')">Like</button>
+            <button onclick="editPost('${post.id}', '${post.content}')">Edit</button>
+          </div>
+        `;
 
-    <div>
-      <p>Choose Country</p>
-      <select id="country" name="country">
-        <option value="India">India</option>
-        <option value="USA">USA</option>
-        <option value="Canada">Canada</option>
-        <option value="UK">UK</option>
-      </select>
-    </div>
+        container.appendChild(postElement);
+      });
+    }
 
-    <button onclick="createUser()" id="creatbtn">Submit</button>
-    <button onclick="updateUser()" id="Updatebtn" style="display:none;">Update</button>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Fname</th>
-                <th>Gender</th>
-                <th>Subjects</th>
-                <th>file</th>
-                <th>Email</th>
-                <th>Feedback</th>
-                <th>Country</th>
-                <th>Edit</th>
-                <th>Delete</th>
-            </tr>
-        </thead>
-        <tbody>
-
-        </tbody>
-    </table>
-
-    <script>
-      var users = JSON.parse(localStorage.getItem("users")) || [];
-      console.log(JSON.parse(localStorage.getItem("users")));
-      var index = -1; 
-
-      function createUser() {
-        var user = {
-          fname: "",
-          gender: "",
-          subjects: "",
-          file: "",
-          email: "",
-          feedback: "",
-          country: ""
-        };
-
-        for (let a in user) {
-          if (a !== 'gender' && a !== 'subjects' && a !== 'file') {
-            user[a] = document.getElementById(a)?.value || '';
-          }
-        }
-
-        user.gender = document.querySelector('input[name="gender"]:checked')?.value;
-
-        user.subjects = Array.from(document.querySelectorAll('input[name="subjects"]:checked'))
-          .map(input => input.value);
-
-        user.file = document.getElementById("file").files[0]?.name;
-
-        users.push(user);
-        clearForm()
-        readUser()
-        localStorage.setItem("users", JSON.stringify(users));
+    function editPost(postId, oldContent) {
+      const newContent = prompt("Edit your post:", oldContent);
+      if (newContent) {
+        updatePost(postId, { content: newContent, likes: 0 });
       }
+    }
 
-      function readUser() {
-        document.querySelector("tbody").innerHTML = "";
-        users.forEach((usr, i) => {
-            var tr = document.createElement("tr");
-            for (a in usr) {
-                var td = document.createElement("td");
-                td.innerHTML = usr[a];
-                tr.appendChild(td)
-            }
+    async function likePost(postId) {      
+      const response = await fetch(`${apiUrl}/${postId}`);
+      const post = await response.json();
+      const updatedPost = { ...post, likes: post.likes + 1 };  
+      console.log('Post updated with new likes:', updatedPost); 
+      updatePost(postId, updatedPost);  
+    }
 
-            var deltd = document.createElement("td");
-            var delbtn = document.createElement("button");
-            delbtn.innerHTML = "Delete"
-            delbtn.setAttribute("onclick", "deleteUser("+i+")")
-            deltd.appendChild(delbtn)
-            tr.appendChild(deltd)
+    
+    document.getElementById("addPostForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const content = document.getElementById("postContent").value;
+      addPost(content);
+      e.target.reset();
+    });
 
-            var edittd = document.createElement("td");
-            var editBtn = document.createElement("button")
-            editBtn.innerHTML = "Edit"
-            editBtn.setAttribute("onclick", "editUser("+i+")");
-            edittd.appendChild(editBtn);
-            tr.appendChild(edittd)
-
-            document.querySelector("tbody").appendChild(tr)
-        })
-      }
-
-      function deleteUser(i) {
-        users.splice(i, 1);
-        localStorage.setItem("users", JSON.stringify(users));
-        readUser()
-      }
-
-      function editUser(i) {
-        index = i;
-        var userToBeEdit = users[i];
-
-        for (let a in userToBeEdit) {
-          if (a !== "gender" && a !== "subjects" && a !== "file") {
-            document.getElementById(a).value = userToBeEdit[a] || "";
-          }
-        }
-
-        if (userToBeEdit.gender) {
-          document.querySelector(`input[name="gender"][value="${userToBeEdit.gender}"]`).checked = true;
-        }
-
-        document.querySelectorAll('input[name="subjects"]').forEach(checkbox => {
-          checkbox.checked = userToBeEdit.subjects.includes(checkbox.value);
-        });
-
-        document.getElementById("Updatebtn").style.display = "block"
-        document.getElementById("creatbtn").style.display = "none"
-      }
-
-      function updateUser() {
-        var updatedUser = {
-          fname: "",
-          gender: "",
-          subjects: "",
-          file: "",
-          email: "",
-          feedback: "",
-          country: ""
-        };
-
-        for (let a in updatedUser) {
-          if (a !== "gender" && a !== "subjects" && a !== "file") {
-            updatedUser[a] = document.getElementById(a)?.value || "";
-          }
-        }
-
-        updatedUser.gender = document.querySelector('input[name="gender"]:checked')?.value;
-        updatedUser.subjects = Array.from(document.querySelectorAll('input[name="subjects"]:checked'))
-          .map(input => input.value);
-
-        updatedUser.file = users[index].file;
-
-        users[index] = updatedUser;
-        
-        localStorage.setItem("users", JSON.stringify(users));
-        readUser();
-        clearForm()
-
-        document.getElementById("Updatebtn").style.display = "none"
-        document.getElementById("creatbtn").style.display = "block"
-      }
-
-      function clearForm() {
-        var user = {
-          fname: "",
-          gender: "",
-          subjects: "",
-          file: "",
-          email: "",
-          feedback: "",
-          country: ""
-        };
-
-        for (let a in user) {
-          if (a !== 'gender' && a !== 'subjects' && a !== 'file') {
-            document.getElementById(a).value = ""; 
-          }
-        }
-
-        document.querySelectorAll('input[name="gender"]').forEach(input => input.checked = false);
-        document.querySelectorAll('input[name="subjects"]').forEach(input => input.checked = false);
-        document.getElementById('file').value = ""; 
-      }
-
-      readUser()
-    </script>
-  </body>
+    fetchPosts();
+  </script>
+</body>
 </html>
