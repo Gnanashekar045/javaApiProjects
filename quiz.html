@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Online Quiz App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 font-sans">
+  <div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold text-center mb-6">Online Quiz App</h1>
+
+    <!-- Quiz Area -->
+    <div id="quiz-container" class="max-w-xl mx-auto bg-white shadow-lg rounded-lg p-6">
+      <div id="question" class="text-lg font-semibold mb-4"></div>
+      <div id="answers" class="space-y-2"></div>
+      <button id="next-btn" class="bg-blue-500 text-white px-4 py-2 rounded mt-4 hidden">Next</button>
+    </div>
+
+    <!-- Timer -->
+    <div id="timer" class="text-center text-lg font-semibold mt-6"></div>
+  </div>
+</body>
+<script>
+  const feacthquestions = async () => {
+    try {
+      const response = await fetch("https://opentdb.com/api.php?amount=5&category=9&type=multiple");
+      if (!response.ok) throw new Error("failed to fecth question ");
+      const data = await response.json();
+      return data.results
+    } catch (error) {
+      console.error("problem is", error)
+    }
+
+  }
+  const createtimer = (duratiton, onTick, onend) => {
+    let timeremaining = duratiton;
+    const intervalid = setInterval(() => {
+      if (timeremaining > 0) {
+        onTick(timeremaining);
+        timeremaining--
+
+      } else {
+        clearInterval(intervalid);
+        onend()
+      }
+
+    }, 1000
+
+    )
+    return () => clearInterval(intervalid)
+
+  };
+  let currentindex = 0;
+  const correctAnswer = [];
+  const userAnswers = [];
+  let stopTimer;
+
+  const renderquiz = (questions) => {
+    if (currentindex >= questions.length) {
+      document.getElementById("quiz-container").innerHTML = `
+       <div class='text-center'>Quiz Completed!</div>
+        `
+      calculatscore(userAnswers, correctAnswer);
+      return;
+    }
+    const question = questions[currentindex];
+    document.getElementById("question").innerHTML = question.question;
+    correctAnswer.push(question.correct_answer);
+    const answers = [...question.incorrect_answers, question.correct_answer].sort(()=>Math.random() - 0.5)
+    const answersContainer = document.getElementById("answers");
+    answersContainer.innerHTML = answers.map(
+      (answer, index) => `
+      
+        <button class="w-full bg-gray-200 hover:bg-gray-300 p-2 rounded"  onclick="selectanswer('${answer}')">${answer}</button>
+   
+      `
+      
+  
+  
+    )  .join(""),
+
+    document.getElementById("next-btn").classList.add("hidden"),
+    stopTimer = createtimer(
+      15,
+      (time) => {
+        document.getElementById("next-btn").classList.remove("hidden");
+        document.getElementById("timer").innerHTML = "time remaining" + time
+      },()=>{ userAnswers.push(null),
+        movetonextquestion(questions)}
+     
+    )
+   
+  }
+
+
+
+
+  const selectanswer = (answer) => {
+    userAnswers[currentindex] = answer;
+    document.getElementById("next-btn").classList.remove("hidden");
+    stopTimer()
+
+  }
+
+  const movetonextquestion = (questions) => {
+    currentindex++
+    renderquiz(questions)
+  }
+  const calculatscore = (answers, correctAnswer) => {
+
+
+    const score = answers.reduce((acc, answer, index) => {
+      return acc + (answer === correctAnswer[index] ? 1 : 0);
+    }, 0)
+    document.getElementById("quiz-container").innerHTML = `
+       <div class='text-center'>${score}/${correctAnswer.length}</div>`
+
+  }
+
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    const questions = await feacthquestions();
+    renderquiz(questions);
+    document.getElementById("next-btn").addEventListener("click", movetonextquestion(questions))
+
+  })
+</script>
+
+</html>

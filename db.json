@@ -5,18 +5,6 @@
       "name": "sugar",
       "price": 45,
       "quantity": 2
-    },
-    {
-      "id": "1738743287833",
-      "name": "sdsdsd",
-      "price": 65,
-      "quantity": 3
-    },
-    {
-      "id": "1738743590892",
-      "name": "sugar",
-      "price": 45,
-      "quantity": 5
     }
   ],
   "postComments": [
@@ -55,6 +43,12 @@
       "name": "gnna",
       "email": "shekar@gmail.com",
       "role": "Subscriber"
+    },
+    {
+      "id": "e18b",
+      "name": "gnna",
+      "email": "shekar@gmail.com",
+      "role": "Subscriber"
     }
   ],
   "products": [
@@ -63,5 +57,20 @@
       "name": "sugar",
       "quantity": 45
     }
-  ],"movies":[]
+  ],
+  "movies": [],
+  "expense": [
+    {
+      "id": 1739078233178,
+      "description": "sugar",
+      "amount": 56,
+      "category": "Food"
+    },
+    {
+      "id": 1739079631036,
+      "description": "dol",
+      "amount": 45,
+      "category": "Food"
+    }
+  ],"digital":[]
 }
